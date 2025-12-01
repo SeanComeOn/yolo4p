@@ -7,6 +7,37 @@ import torch.nn as nn
 # Obj Loss: 该 Cell 的置信度应当趋向 1，其他背景 Cell 趋向 0。
 # Cls Loss: 该 Cell 的类别概率应当趋向真实类别。
 
+def bbox_iou(box1, box2, eps=1e-7):
+    """
+    计算两个框的 IoU (Intersection over Union)
+    box1: [N, 4] (x, y, w, h)
+    box2: [N, 4] (x, y, w, h)
+    返回: [N] iou
+    """
+    # 1. 转换成角点坐标 (x1, y1, x2, y2)
+    b1_x1, b1_x2 = box1[:, 0] - box1[:, 2] / 2, box1[:, 0] + box1[:, 2] / 2
+    b1_y1, b1_y2 = box1[:, 1] - box1[:, 3] / 2, box1[:, 1] + box1[:, 3] / 2
+    
+    b2_x1, b2_x2 = box2[:, 0] - box2[:, 2] / 2, box2[:, 0] + box2[:, 2] / 2
+    b2_y1, b2_y2 = box2[:, 1] - box2[:, 3] / 2, box2[:, 1] + box2[:, 3] / 2
+
+    # 2. 计算交集 (Intersection)
+    inter_x1 = torch.max(b1_x1, b2_x1)
+    inter_y1 = torch.max(b1_y1, b2_y1)
+    inter_x2 = torch.min(b1_x2, b2_x2)
+    inter_y2 = torch.min(b1_y2, b2_y2)
+    
+    inter_area = (inter_x2 - inter_x1).clamp(0) * (inter_y2 - inter_y1).clamp(0)
+
+    # 3. 计算并集 (Union)
+    w1, h1 = box1[:, 2], box1[:, 3]
+    w2, h2 = box2[:, 2], box2[:, 3]
+    union_area = w1 * h1 + w2 * h2 - inter_area + eps
+
+    # 4. IoU
+    iou = inter_area / union_area
+    return iou
+
 class SimpleComputeLoss:
     def __init__(self, strides=[8, 16, 32]):
         self.strides = strides

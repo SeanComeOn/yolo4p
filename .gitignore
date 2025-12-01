@@ -63,3 +63,4 @@ coco128/images/
 # Keep small files for reference
 !coco128/images/.gitkeep
 coco128*
+*.zip

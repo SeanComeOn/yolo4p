@@ -24,7 +24,9 @@ def train_professional():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     # --- 2. 数据与模型 ---
-    dataset = COCO128Dataset('coco128') # 假设你已经定义了这个类
+    # 使用矩形输入: 800x640 (宽x高)
+    # 注意: Tensor 形状将是 [Batch, 3, 640, 800] (Channels, Height, Width)
+    dataset = COCO128Dataset('coco128', img_size=(800, 640))
     dataloader = torch.utils.data.DataLoader(
         dataset, 
         batch_size=8, 

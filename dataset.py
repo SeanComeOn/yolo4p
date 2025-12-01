@@ -8,7 +8,12 @@ class COCO128Dataset(Dataset):
     def __init__(self, root_dir='coco128', img_size=640):
         self.img_dir = os.path.join(root_dir, 'images/train2017')
         self.label_dir = os.path.join(root_dir, 'labels/train2017')
-        self.img_size = img_size
+        
+        # 支持元组 (width, height) 和整数输入
+        if isinstance(img_size, int):
+            self.img_size = (img_size, img_size)  # 正方形
+        else:
+            self.img_size = img_size  # 期望 (Width, Height)
         
         # 获取所有图片文件名
         self.img_files = sorted([f for f in os.listdir(self.img_dir) if f.endswith('.jpg')])
@@ -21,16 +26,25 @@ class COCO128Dataset(Dataset):
         img_path = os.path.join(self.img_dir, img_name)
         label_path = os.path.join(self.label_dir, img_name.replace('.jpg', '.txt'))
 
-        # 1. 读取图片 & Resize
+        # 1. 读取图片 & 强制 Resize 到目标矩形尺寸
         img0 = cv2.imread(img_path)
         h0, w0 = img0.shape[:2]  # 原图尺寸
-        img = cv2.resize(img0, (self.img_size, self.img_size))
+        
+        # 获取目标尺寸: (width, height)
+        dest_w, dest_h = self.img_size
+        
+        # 强制缩放到目标尺寸（不保留比例，不填充）
+        # 注意: cv2.resize 参数顺序是 (width, height)
+        img = cv2.resize(img0, (dest_w, dest_h))
         
         # BGR -> RGB -> Channel First -> Normalize
+        # 最终 Tensor 形状: [3, dest_h, dest_w] (Channels, Height, Width)
         img = img[:, :, ::-1].transpose(2, 0, 1) 
         img = np.ascontiguousarray(img, dtype=np.float32) / 255.0
 
-        # 2. 读取标签
+        # 2. 读取标签（标签已经是归一化坐标，可以直接使用）
+        # YOLO 格式标签已经是相对于原图的归一化坐标 [0, 1]
+        # 由于我们使用强制缩放，这些归一化坐标仍然有效
         labels = []
         if os.path.exists(label_path):
             # txt 每一行: class x_center y_center w h (归一化的)
