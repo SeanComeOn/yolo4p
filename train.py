@@ -26,7 +26,7 @@ def train_professional():
     # --- 2. 数据与模型 ---
     # 使用矩形输入: 800x640 (宽x高)
     # 注意: Tensor 形状将是 [Batch, 3, 640, 800] (Channels, Height, Width)
-    dataset = COCO128Dataset('coco128', img_size=(800, 640))
+    dataset = COCO128Dataset('coco2017', img_size=(800, 640))
     dataloader = torch.utils.data.DataLoader(
         dataset, 
         batch_size=8, 

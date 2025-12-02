@@ -64,3 +64,4 @@ coco128/images/
 !coco128/images/.gitkeep
 coco128*
 *.zip
+coco2017*

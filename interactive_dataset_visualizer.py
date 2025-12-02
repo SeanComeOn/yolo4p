@@ -4,8 +4,11 @@ from flask import Flask, render_template_string, jsonify, send_file
 
 # ================= 配置区域 =================
 # 确保这里的路径对应你之前下载的 coco128 目录结构
-IMG_DIR = 'coco128/images/train2017'
-LABEL_DIR = 'coco128/labels/train2017'
+# IMG_DIR = 'coco128/images/train2017'
+# LABEL_DIR = 'coco128/labels/train2017'
+IMG_DIR = 'coco2017/images/val2017'
+LABEL_DIR = 'coco2017/labels/val2017'
+
 
 # COCO 80类名称 (对应索引 0-79)
 COCO_CLASSES = [
