@@ -213,9 +213,10 @@ NAMES = [
 # 为每个类别生成一个随机颜色
 COLORS = [[np.random.randint(0, 255) for _ in range(3)] for _ in range(len(NAMES))]
 
-def save_inference_sample(model, dataset, epoch, save_dir, num_samples=10):
+def save_inference_sample(model, dataset, epoch, save_dir, prefix='train', num_samples=10):
     """
     推理前 num_samples 张图，画出预测框并保存到 save_dir
+    prefix: 'train' or 'val', 用于区分训练集和验证集图片
     """
     model.eval() # 切换到评估模式 (关闭 BatchNorm 更新等)
     device = next(model.parameters()).device
@@ -266,8 +267,8 @@ def save_inference_sample(model, dataset, epoch, save_dir, num_samples=10):
                 cv2.putText(img_vis, label, (x1, y1 - 2), 0, 0.5, [255, 255, 255], thickness=1, lineType=cv2.LINE_AA)
         
         # 6. 保存
-        save_path = os.path.join(epoch_dir, f'val_img_{i}.jpg')
+        save_path = os.path.join(epoch_dir, f'{prefix}_img_{i}.jpg')
         cv2.imwrite(save_path, img_vis)
         
-    print(f"Epoch {epoch} 可视化结果已保存至: {epoch_dir}")
+    print(f"Epoch {epoch} {prefix} 可视化结果已保存至: {epoch_dir}")
     model.train() # 切回训练模式

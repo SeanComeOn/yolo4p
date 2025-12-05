@@ -5,9 +5,16 @@ import torch
 from torch.utils.data import Dataset
 
 class COCO128Dataset(Dataset):
-    def __init__(self, root_dir='coco128', img_size=640):
-        self.img_dir = os.path.join(root_dir, 'images/train2017')
-        self.label_dir = os.path.join(root_dir, 'labels/train2017')
+    def __init__(self, root_dir='coco128', img_size=640, split='train'):
+        # 根据 split 参数选择目录
+        if split == 'train':
+            self.img_dir = os.path.join(root_dir, 'images/train2017')
+            self.label_dir = os.path.join(root_dir, 'labels/train2017')
+        elif split == 'val':
+            self.img_dir = os.path.join(root_dir, 'images/val2017')
+            self.label_dir = os.path.join(root_dir, 'labels/val2017')
+        else:
+            raise ValueError(f"split must be 'train' or 'val', got {split}")
         
         # 支持元组 (width, height) 和整数输入
         if isinstance(img_size, int):
