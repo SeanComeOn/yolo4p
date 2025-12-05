@@ -8,7 +8,7 @@ from model import SimpleYOLO, save_inference_sample
 from loss_function import SimpleComputeLoss
 
 
-def train_professional(resume=None):
+def train_professional(resume=None, data_root='coco2017'):
     """
     专业训练函数
     
@@ -16,6 +16,8 @@ def train_professional(resume=None):
         resume (str, optional): 检查点路径，用于继续训练。
                                 可以是 .pt 文件路径，如 'runs/2025-12-02_23-16-21/weights/epoch_100.pt'
                                 如果为 None，则从头开始训练。
+        data_root (str): 数据集根目录，默认为 'coco2017'。
+                         目录下应包含 images/train2017, images/val2017 等子目录。
     """
     # --- 1. 实验环境设置 ---
     # 生成 runs/2023-10-27_10-30-00 这样的目录
@@ -32,14 +34,16 @@ def train_professional(resume=None):
         print(f"📁 新日志目录: {save_dir}")
     else:
         print(f"🚀 从头开始训练！日志目录: {save_dir}")
+    
+    print(f"📂 数据集根目录: {data_root}")
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     # --- 2. 数据与模型 ---
     # 使用矩形输入: 800x640 (宽x高)
     # 注意: Tensor 形状将是 [Batch, 3, 640, 800] (Channels, Height, Width)
-    train_dataset = COCO128Dataset('coco2017', img_size=(800, 640), split='train')
-    val_dataset = COCO128Dataset('coco2017', img_size=(800, 640), split='val')
+    train_dataset = COCO128Dataset(data_root, img_size=(800, 640), split='train')
+    val_dataset = COCO128Dataset(data_root, img_size=(800, 640), split='val')
     
     train_loader = torch.utils.data.DataLoader(
         train_dataset, 
@@ -221,7 +225,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='YOLO 训练脚本')
     parser.add_argument('--resume', type=str, default=None,
                         help='检查点路径，用于继续训练。例如: runs/2025-12-02_23-16-21/weights/epoch_100.pt')
+    parser.add_argument('--data', type=str, default='coco2017',
+                        help='数据集根目录。默认: coco2017')
     args = parser.parse_args()
     
     # 确保之前的 SimpleYOLO, COCO128Dataset, SimpleComputeLoss, non_max_suppression 都在上下文中
-    train_professional(resume=args.resume)
+    train_professional(resume=args.resume, data_root=args.data)
